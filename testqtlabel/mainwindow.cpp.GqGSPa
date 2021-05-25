@@ -1,0 +1,209 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QDebug>
+
+MainWindow::MainWindow(QWidget *parent)
+  : QMainWindow(parent)
+  , ui(new Ui::MainWindow)
+{
+  mousePressed = false;
+
+  ligne *tempLigne = new ligne();
+
+  ui->setupUi(this);
+  // curseur: croix
+  this->setCursor(QCursor(Qt::CrossCursor));
+  ui->pos_souris->setText(QString(QString::number(hasMouseTracking())));
+
+ /* centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
+  setMouseTracking(true);*/
+}
+
+MainWindow::~MainWindow()
+{
+  delete ui;
+}
+
+
+
+
+void MainWindow::paintEvent(QPaintEvent *event )
+   {
+
+  //Tracer actuelle
+
+
+if(tempLigne->ptint.empty() != true)
+{
+   QPoint *intl  = new QPoint[tempLigne->ptint.size()];
+  QPainter actualDraw(this);
+  for(int i =0;i<tempLigne->ptint.size();i++)
+  {
+    intl[i] = tempLigne->ptint[i];
+
+}
+  actualDraw.drawPolyline(intl,tempLigne->ptint.size());
+  delete[] intl;
+
+}
+
+
+if(mesLignes.empty() != true)
+ {
+QPainter oldDraw(this);
+for(int i =0;i<mesLignes.size();i++)
+{
+QPoint *oldDrawPoint  = new QPoint[mesLignes[i].ptint.size()];
+
+
+  for(int j = 0;j<mesLignes[i].ptint.size();j++)
+  {
+
+    oldDrawPoint[j] = mesLignes[i].ptint[j];
+
+  }
+  oldDraw.drawPolyline(oldDrawPoint,mesLignes[i].ptint.size());
+  oldDraw.setPen(QPen(Qt::red,15));
+  oldDraw.drawPoint(mesLignes[i].pta);
+  oldDraw.drawPoint(mesLignes[i].ptb);
+
+  delete[] oldDrawPoint;
+}
+
+}
+
+
+
+
+}
+
+
+void MainWindow::animationStart()
+{
+  if(index)
+  {
+    qDebug() << "Lancement de l'animation";
+    ui->joueur_1->move(mesLignes.last().pta);
+    ui->ballon->move(mesLignes.last().pta);
+  }
+  else
+   {
+    if(index == mesLignes.last().ptint.size())
+    {
+      qDebug() << "Arrêt";
+      index =0;
+      timer->stop();
+      return;
+    }
+    else
+    {
+      qDebug() << "Animation au point :" <<index;
+      ui->joueur_1->move(mesLignes.last().ptint[index]);
+      ui->ballon->move(mesLignes.last().ptint[index]);
+
+    }
+
+
+  }
+  index++;
+
+
+}
+
+
+
+
+void  MainWindow::mousePressEvent( QMouseEvent * event ){
+    // position de la souris
+ /* for(int i = 0; i < mesLignes.size();i++)
+  {
+    if(( event->pos().rx() <= mesLignes[i].pta.rx()+10) || (event->pos().ry() <= mesLignes[i].pta.ry()+10))  { isMoving = true; index = i; pt=0; return ;};
+    if(event->pos()== mesLignes[i].ptb){ isMoving = true; index = i; pt=1;return ;};
+  //  if(event->pos()== mesLignes[i].ptint){ isMoving = true; index = i; pt=2;return ;};
+
+  }
+*/
+  qDebug() << "Nombre de figure : "<< mesLignes.size();
+  if (event->button() == Qt::LeftButton)
+  {
+    if(!tempLigne->ptint.empty())
+    {
+    tempLigne->ptint.clear();
+    qDebug() << "Taille : "<< tempLigne->ptint.size();
+     }
+    tempLigne->ptint.append(event->pos());
+      tempLigne->pta = event->pos();
+      qDebug() << "Ajout point de départ : " << event->pos();
+      isDrawing = true;
+      mousePressed = true;
+      update();
+
+  }
+}
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+
+      if(!isMoving)
+      {
+        ui->pos_souris->setText(QString("Pos X:"+QString::number(event->pos().rx())+"\nPosY:"+QString::number(event->pos().ry())));
+        ui->x->setText(QString("Pos X:"+QString::number(event->pos().rx())+"\nPosY:"+QString::number(event->pos().ry())));
+        if ((event->buttons() & Qt::LeftButton) && isDrawing)
+        {
+          qDebug() << "Detect 1:" << tempLigne->ptint.size();
+         tempLigne->ptint.append(event->pos());
+            qDebug() << "Ajout point intermediaire : "<< event->pos()  ;
+        }
+      }
+      else
+      {
+       /* switch (pt)
+        {
+          case 0 : mesLignes[index].pta = event->pos();
+          break;
+          case 1 : mesLignes[index].ptint.append(event->pos());
+          break;
+        //  case 2 : mesLignes[index].ptint = event->pos();
+          break;
+
+        }*/
+      }
+
+      update();
+
+
+
+}
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+  isMoving = false;
+  if (event->button() == Qt::LeftButton && isDrawing)
+    {
+
+      ligne *nouvelleligne = new ligne;
+      nouvelleligne->pta = tempLigne->pta;
+      nouvelleligne->ptb = event->pos();
+      nouvelleligne->ptint = tempLigne->ptint;
+      mesLignes.append(*nouvelleligne);
+
+      index_2 =0;
+      delete nouvelleligne;
+      isDrawing = false;
+      mousePressed = false;
+      update();
+
+  }
+}
+
+
+
+
+
+
+
+void MainWindow::on_start_clicked()
+{
+  QTimer *timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()),this, SLOT(animationStart()));
+  timer->start(10);
+
+}
