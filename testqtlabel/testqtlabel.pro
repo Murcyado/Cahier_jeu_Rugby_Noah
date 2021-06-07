@@ -17,10 +17,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    printview.cpp \
+    spreadsheet.cpp \
+    spreadsheetdelegate.cpp \
+    spreadsheetitem.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    printview.h \
+    spreadsheet.h \
+    spreadsheetdelegate.h \
+    spreadsheetitem.h
 
 FORMS += \
     mainwindow.ui
@@ -29,3 +37,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    Terrain.qrc

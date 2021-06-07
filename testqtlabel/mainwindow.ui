@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1597</width>
-    <height>936</height>
+    <width>1590</width>
+    <height>1121</height>
    </rect>
   </property>
   <property name="sizeIncrement">
@@ -80,7 +80,7 @@
       <x>1170</x>
       <y>0</y>
       <width>431</width>
-      <height>761</height>
+      <height>861</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -95,7 +95,7 @@
        <x>0</x>
        <y>0</y>
        <width>429</width>
-       <height>759</height>
+       <height>859</height>
       </rect>
      </property>
      <widget class="QPushButton" name="start">
@@ -388,6 +388,19 @@ background-color: rgb(255, 255, 255);</string>
        <string>Vitesse du joueur 2 :</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="bouton_tableur">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>770</y>
+        <width>381</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Créer un tableur</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="Line" name="line">
@@ -473,6 +486,32 @@ background-color: rgb(255, 255, 255);</string>
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>0</y>
+      <width>446</width>
+      <height>880</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>../../../../Downloads/terrain(1).jpg</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <zorder>label</zorder>
+   <zorder>joueur_1</zorder>
+   <zorder>scrollArea</zorder>
+   <zorder>line</zorder>
+   <zorder>line_2</zorder>
+   <zorder>joueur_2</zorder>
+   <zorder>ballon</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

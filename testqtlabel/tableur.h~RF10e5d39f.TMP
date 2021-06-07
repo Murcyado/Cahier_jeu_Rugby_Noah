@@ -1,0 +1,11 @@
+#ifndef TABLEUR_H
+#define TABLEUR_H
+
+
+class tableur
+{
+public:
+    tableur();
+};
+
+#endif // TABLEUR_H

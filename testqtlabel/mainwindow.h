@@ -15,10 +15,12 @@
 #include <QObject>
 #include <QColor>
 #include <QPushButton>
+#include <QGraphicsPixmapItem>
+#include "spreadsheet.h"
 
 struct ligne  //joueur 1
 {
-  QPoint  pta;
+  QPoint pta;
   QPoint ptb;
   QList<QPoint> ptint;
 
@@ -26,7 +28,7 @@ struct ligne  //joueur 1
 
 struct ballon   //ballon
 {
-  QPoint  pta;
+  QPoint pta;
   QPoint ptb;
   QList<QPoint> ptint;
 
@@ -57,6 +59,14 @@ public:
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
 
+public slots:
+
+  ligne getTempLigne(ligne *tempLigne);
+
+signals:
+
+  void sendTempLigne(ligne *tempLigne2);
+
 protected:
     void keyPressEvent(QKeyEvent *event) override; // test de modifications des couleurs
 
@@ -64,6 +74,8 @@ private slots:
   void paintEvent(QPaintEvent* )  override;
   void animationStart();
  // void paint(QPainter *painter);
+
+//création de la barre de menu pour la création du tableur
 
 //mettre en marche le programme
 
@@ -94,7 +106,15 @@ private slots:
 
   void on_Trottiner_clicked();
 
+
+// création du tableur
+
+
+  void on_bouton_tableur_clicked();
+
 private:
+  SpreadSheet *tableau_retard ;
+
   Ui::MainWindow *ui;
   QTimer *timer;
   /*QTimer *timer_course;
@@ -125,10 +145,10 @@ private:
   QPoint lastPoint;
   QPoint firstPoint;
 
-  //distance entre 1 joueur et le ballon
+  /*//distance entre 1 joueur et le ballon
   QString distance_joueur2;
   QString distance_joueur1;
-  QString distance;
+  QString distance;*/
 
   //distance entre deux points
   QString distance_ballon;
@@ -141,15 +161,9 @@ private:
   QString vitesse_du_joueur_2;
 
 
-
-  QList<QPoint> interPoint;
-  QRect rec1;
-  QPainter *pencilPainter = new QPainter(this);
-
-
   int vitesse_trottiner = 8;
-  int vitesse_marche = 5;
-  int vitesse_course = 15;
+  int vitesse_marche = 3;
+  int vitesse_course = 13;
 
 
   ligne *tempLigne = new ligne();   //ligne du joueur 1
@@ -177,11 +191,11 @@ private:
   QPoint coord;
   float x = 0;
   unsigned index_2=0;
-  int selecteur = 0;
   QList<ligne> mesLignes;
   QList<ballon> LeBallon;
   QList<joueur_2> AutreJoueur;
   QColor color;
+
 
 };
 #endif // MAINWINDOW_H

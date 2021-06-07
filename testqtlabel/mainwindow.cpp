@@ -1,37 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
-#include <QGraphicsPixmapItem>
-#include <QColor>
-#include <QLabel>
+#include "spreadsheet.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
   , ui(new Ui::MainWindow)
 {
   mousePressed = false;
-
-  ligne *tempLigne = new ligne();
-  ballon *ligne_ballon = new ballon();
-  joueur_2 *ligne_joueur_2 = new joueur_2();
-
   ui->setupUi(this);
-  // curseur: croix
-  this->setCursor(QCursor(Qt::CrossCursor));
 
-  // on désactive ces boutons pour éviter que lorsqu'aucune trajectoire n'est crée, le programme plante
+  // on désactive ces boutons pour éviter que lorsqu'aucune trajectoire n'est crée, sinon si l'on ne crée pas de trajectoires, appuyer sur un de ces boutons
 
   ui->reset_joueur->setEnabled(false);
   ui->reset->setEnabled(false);
   ui->start->setEnabled(false);
   ui->stop->setEnabled(false);
 
-  /*ui->Trottiner->setEnabled(false);
-  ui->Marcher->setEnabled(false);
-  ui->Courir->setEnabled(false);*/
-
- /* centralWidget()->setAttribute(Qt::WA_TransparentForMouseEvents);
-  setMouseTracking(true);*/
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +24,7 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
+//on créer deux boutons rattachant le ballon aux joueurs
 
 void MainWindow::on_joueur1_clicked()
 {
@@ -95,6 +81,8 @@ void MainWindow::on_joueur2_clicked()
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MainWindow::paintEvent(QPaintEvent *event) //Création de la trajectoire
    {
 
@@ -103,9 +91,9 @@ void MainWindow::paintEvent(QPaintEvent *event) //Création de la trajectoire
 
     if(tempLigne->ptint.empty() != true && isDrawing)
     {
-      QPoint *intl  = new QPoint[tempLigne->ptint.size()];
+      QPoint *intl  = new QPoint[tempLigne->ptint.size()];  //création d'un nouveau point
 
-      QPainter actualDraw(this);
+      QPainter actualDraw(this);  //allocateur actualDraw appartient à mainwindow
       for(int i =0;i<tempLigne->ptint.size();i++)
       {
           intl[i] = tempLigne->ptint[i];
@@ -120,7 +108,7 @@ void MainWindow::paintEvent(QPaintEvent *event) //Création de la trajectoire
 
     if(mesLignes.empty() != true)
      {
-    QPainter *oldDraw = new QPainter(this);
+    QPainter *oldDraw = new QPainter(this); //allocuteur oldDraw appartient à mainwindow
     for(int i =0;i<mesLignes.size();i++)
     {
     QPoint *oldDrawPoint  = new QPoint[mesLignes[i].ptint.size()];
@@ -253,23 +241,6 @@ void MainWindow::paintEvent(QPaintEvent *event) //Création de la trajectoire
 
 
 void  MainWindow::mousePressEvent( QMouseEvent * event ){//animation lors d'utilisations des clics de souris
-    // position de la souris
- /* for(int i = 0; i < mesLignes.size();i++)
-  {
-    if(( event->pos().rx() <= mesLignes[i].pta.rx()+10) || (event->pos().ry() <= mesLignes[i].pta.ry()+10))  { isMoving = true; index = i; pt=0; return ;};
-    if(event->pos()== mesLignes[i].ptb){ isMoving = true; index = i; pt=1;return ;};
-  //  if(event->pos()== mesLignes[i].ptint){ isMoving = true; index = i; pt=2;return ;};
-
-  }
-*/
-    ui->Marcher->setEnabled(true);
-    ui->Courir->setEnabled(true);
-    ui->Trottiner->setEnabled(true);
-    ui->reset->setEnabled(true);
-    ui->start->setEnabled(true);
-    ui->stop->setEnabled(true);
-
-
     //utilisation du 1er joueur
 
     if(event->button() == Qt::LeftButton)
@@ -526,6 +497,7 @@ void  MainWindow::mousePressEvent( QMouseEvent * event ){//animation lors d'util
 
 
 
+
 }
 
 
@@ -542,22 +514,34 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         ui->x->setText(QString("Pos X:"+QString::number(event->pos().rx())+"\nPosY:"+QString::number(event->pos().ry())));
         ui->y->setText(QString("X="+QString::number(event->x())+"\nY="+QString::number(event->y())));
 
+        // calcul de la distance entre le point de départ et d'arrêt
+
+        distance_ballon.setNum((ligne_ballon->ptint.length()/5.9)*2);
+        ui->distance_ballon->setText("Distance entre le point de départ et d'arrêt (ballon) : " + distance_ballon + " m");
+
+        distance_joueur_1.setNum((tempLigne->ptint.length()/5.9)*2);
+        ui->distance->setText("Distance entre le point de départ et d'arrêt (joueur 1) : " + distance_joueur_1 + " m");
+
+        distance_joueur_2.setNum((ligne_joueur_2->ptint.length()/5.9)*2);
+        ui->label_2->setText("Distance entre le point de départ et d'arrêt (joueur 2) :" + distance_joueur_2 + " m");
+
+
 
         if ((event->buttons() & Qt::LeftButton) && isDrawing)
         {
-          qDebug() << "Detect 1:" << tempLigne->ptint.size();
+          qDebug() << "Detect joueur 1:" << tempLigne->ptint.size();
          tempLigne->ptint.append(event->pos());
           qDebug() << "Ajout point intermediaire : "<< event->pos();
         }
         else if ((event->buttons() & Qt::RightButton) && isDrawing)
         {
-          qDebug() << "Detect 2:" << ligne_ballon->ptint.size();
+          qDebug() << "Detect ballon:" << ligne_ballon->ptint.size();
          ligne_ballon->ptint.append(event->pos());
           qDebug() << "Ajout point intermediaire : "<< event->pos();
         }
         else if ((event->buttons() & Qt::MiddleButton) && isDrawing)
         {
-          qDebug() << "Detect 3:" << ligne_joueur_2->ptint.size();
+          qDebug() << "Detect joueur 2:" << ligne_joueur_2->ptint.size();
          ligne_joueur_2->ptint.append(event->pos());
           qDebug() << "Ajout point intermediaire : "<< event->pos();
         }
@@ -567,8 +551,12 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         switch (pt)
         {
           case 0 : mesLignes[index].pta = event->pos();
+            LeBallon[index].pta = event->pos();
+            AutreJoueur[index].pta = event->pos();
           break;
           case 1 : mesLignes[index].ptint.append(event->pos());
+            LeBallon[index].ptint.append(event->pos());
+            AutreJoueur[index].ptint.append(event->pos());
           break;
         //  case 2 : mesLignes[index].ptint = event->pos();
           break;
@@ -584,7 +572,15 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::animationStart() //début de l'animation
 {
+    ui->stop->setEnabled(true);
+    if(index == 0)
+    {
+      qDebug() << "Lancement de l'animation";
+      ui->joueur_1->move(mesLignes.last().pta);
 
+      ui->ballon->move(LeBallon.last().pta);
+
+      ui->joueur_2->move(AutreJoueur.last().pta);
     /*//calcul de la distance entre deux labels
     QString distance;
     distance.setNum(sqrt((ui->joueur_2->x() - ui->joueur_1->x()) + (ui->joueur_2->y()-ui->joueur_1->y())) / 13);
@@ -601,72 +597,52 @@ void MainWindow::animationStart() //début de l'animation
 
 
 
-    // calcul de la distance entre le point de départ et d'arrêt
-    distance_ballon.setNum(ligne_ballon->ptint.length()*0.003);
-    ui->distance_ballon->setText("Distance entre le point de départ et d'arrêt (ballon) : " + distance_ballon + " km");
-
-    distance_joueur_1.setNum(tempLigne->ptint.length()*0.003);
-    ui->distance->setText("Distance entre le point de départ et d'arrêt (joueur 1) : " + distance_joueur_1 + " km");
-
-    distance_joueur_2.setNum(ligne_joueur_2->ptint.length()*0.003);
-    ui->label_2->setText("Distance entre le point de départ et d'arrêt (joueur 2) :" + distance_joueur_2 + " km");
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
     //calcul de la vitesse d'un joueur ou du ballon en trottinant
     if (trottiner == true)
     {
-        vitesse_du_ballon.setNum((ligne_ballon->ptint.length()*0.003) / ((ligne_ballon->ptint.length() / vitesse_trottiner)));
+        vitesse_du_ballon.setNum(((ligne_ballon->ptint.length()/5.9)*2) / ((((ligne_ballon->ptint.length()/5.9)*2) / vitesse_trottiner)));
         ui->vitesse_ballon->setText("Vitesse du ballon : " + vitesse_du_ballon + "km/s");
 
-        vitesse_du_joueur_1.setNum((tempLigne->ptint.length()*0.003) / ((tempLigne->ptint.length() / vitesse_trottiner)));
+        vitesse_du_joueur_1.setNum(((tempLigne->ptint.length()/5.9)*2) / ((((tempLigne->ptint.length()/5.9)*2) / vitesse_trottiner)));
         ui->vitesse_joueur1->setText("Vitesse du joueur 1 : " + vitesse_du_joueur_1 + "km/s");
 
-        vitesse_du_joueur_2.setNum((ligne_joueur_2->ptint.length()*0.003) / ((ligne_joueur_2->ptint.length() / vitesse_trottiner)));
+        vitesse_du_joueur_2.setNum(((ligne_joueur_2->ptint.length()/5.9)*2) / ((((ligne_joueur_2->ptint.length()/5.9)*2) / vitesse_trottiner)));
         ui->vitesse_joueur2->setText("Vitesse du joueur 2 : " + vitesse_du_joueur_2 + "km/s");
     }
     //calcul de la vitesse d'un joueur ou du ballon en marchant
     else if (marcher == true)
     {
-        vitesse_du_ballon.setNum((ligne_ballon->ptint.length()*0.003) / ((ligne_ballon->ptint.length() / vitesse_marche)));
-        ui->vitesse_ballon->setText("Vitesse du ballon : " + vitesse_du_ballon + "km/s");
+        vitesse_du_ballon.setNum(((ligne_ballon->ptint.length()/5.9)*2) / ((((ligne_ballon->ptint.length()/5.9)*2) / vitesse_marche)));
+        ui->vitesse_ballon->setText("Vitesse du ballon : " + vitesse_du_ballon + "m/s");
 
-        vitesse_du_joueur_1.setNum((tempLigne->ptint.length()*0.003) / ((tempLigne->ptint.length() / vitesse_marche)));
-        ui->vitesse_joueur1->setText("Vitesse du joueur 1 : " + vitesse_du_joueur_1 + "km/s");
+        vitesse_du_joueur_1.setNum(((tempLigne->ptint.length()/5.9)*2) / ((((tempLigne->ptint.length()/5.9)*2) / vitesse_marche)));
+        ui->vitesse_joueur1->setText("Vitesse du joueur 1 : " + vitesse_du_joueur_1 + "m/s");
 
-        vitesse_du_joueur_2.setNum((ligne_joueur_2->ptint.length()*0.003) / ((ligne_joueur_2->ptint.length() / vitesse_marche)));
-        ui->vitesse_joueur2->setText("Vitesse du joueur 2 : " + vitesse_du_joueur_2 + "km/s");
+        vitesse_du_joueur_2.setNum(((ligne_joueur_2->ptint.length()/5.9)*2) / ((((ligne_joueur_2->ptint.length()/5.9)*2) / vitesse_marche)));
+        ui->vitesse_joueur2->setText("Vitesse du joueur 2 : " + vitesse_du_joueur_2 + "m/s");
     }
     //calcul de la vitesse d'un joueur ou du ballon en courant
     else if (courir == true)
     {
-        vitesse_du_ballon.setNum((ligne_ballon->ptint.length()*0.003) / ((ligne_ballon->ptint.length() / vitesse_course)));
+        vitesse_du_ballon.setNum(((ligne_ballon->ptint.length()/5.9)*2) / ((((ligne_ballon->ptint.length()/5.9)*2) / vitesse_course)));
         ui->vitesse_ballon->setText("Vitesse du ballon : " + vitesse_du_ballon + "km/s");
 
-        vitesse_du_joueur_1.setNum((tempLigne->ptint.length()*0.003) / ((tempLigne->ptint.length() / vitesse_course)));
+        vitesse_du_joueur_1.setNum(((tempLigne->ptint.length()/5.9)*2) / ((((tempLigne->ptint.length()/5.9)*2) / vitesse_course)));
         ui->vitesse_joueur1->setText("Vitesse du joueur 1 : " + vitesse_du_joueur_1 + "km/s");
 
-        vitesse_du_joueur_2.setNum((ligne_joueur_2->ptint.length()*0.003) / ((ligne_joueur_2->ptint.length() / vitesse_course)));
+        vitesse_du_joueur_2.setNum(((ligne_joueur_2->ptint.length()/5.9)*2) / ((((ligne_joueur_2->ptint.length()/5.9)*2) / vitesse_course)));
         ui->vitesse_joueur2->setText("Vitesse du joueur 2 : " + vitesse_du_joueur_2 + "km/s");
     }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    //active l'alerte si le ballon se trouve au-dessus des joueurs
 
-
-  if(index == 0)
-  {
-    qDebug() << "Lancement de l'animation";
-    ui->joueur_1->move(mesLignes.last().pta);
-
-    ui->ballon->move(LeBallon.last().pta);
-
-    ui->joueur_2->move(AutreJoueur.last().pta);
-
-
-    //active l'alerte si la vitesse du ballon dépasse celle des joueurs
-
-    if (vitesse_du_ballon > vitesse_du_joueur_1)
+    if (ui->ballon->x() and ui->ballon->y() > ui->joueur_1->x() and ui->joueur_1->y())
     {
         ui->alerte->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0,0,0);");
 
@@ -677,10 +653,10 @@ void MainWindow::animationStart() //début de l'animation
         index = 0;
         timer->stop();
 
-
     }
 
-    else if (vitesse_du_ballon > vitesse_du_joueur_2)
+
+    else if (ui->ballon->x() and ui->ballon->y() > ui->joueur_2->x() and ui->joueur_2->y())
     {
         ui->alerte->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0,0,0);");
 
@@ -696,8 +672,8 @@ void MainWindow::animationStart() //début de l'animation
 
     if(ui->joueur_1->x() and ui->joueur_1->y() == ui->ballon->x() and ui->ballon->y())
     {
-     ui->ballon->setGeometry(newLabelX+10,newLabelY+10,71,71);
-     ui->joueur_1->setGeometry(newX+10,newY+10,71,71);
+        ui->joueur_1->setGeometry(ui->joueur_1->x(),ui->joueur_1->y(),71,71);
+        ui->ballon->setGeometry(ui->joueur_1->x() + ui->joueur_1->width() -10,ui->joueur_1->y() -10 + ui->joueur_1->height(),71,71);
     if(firstPoint.isNull() )
     {
       firstPoint.setX(newX);
@@ -721,10 +697,10 @@ void MainWindow::animationStart() //début de l'animation
     }
 
 
-    if(ui->joueur_2->x() and ui->joueur_2->y() == ui->ballon->x() and ui->ballon->y())
+    else if(ui->joueur_2->x() and ui->joueur_2->y() == ui->ballon->x() and ui->ballon->y())
     {
-     ui->ballon->setGeometry(newLabelX+10,newLabelY+10,71,71);
-     ui->joueur_2->setGeometry(LabelX,LabelY,71,71);
+        ui->ballon->setGeometry(ui->joueur_2->x() + ui->joueur_2->width() -10 ,ui->joueur_2->y() + ui->joueur_2->height() -10,71,71);
+        ui->joueur_2->setGeometry(ui->joueur_2->x(), ui->joueur_2->y(),71,71);
     if(firstPoint.isNull() )
     {
       firstPoint.setX(LabelX);
@@ -783,6 +759,7 @@ void MainWindow::animationStart() //début de l'animation
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+
   isMoving = false;
   if (event->button() == Qt::LeftButton && isDrawing)
     {
@@ -799,6 +776,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
       update();
 
   }
+
   if (event->button() == Qt::RightButton && isDrawing)
   {
       ballon *nouvelleligne = new ballon;
@@ -813,6 +791,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
       mousePressed = false;
       update();
   }
+
   if (event->button() == Qt::MiddleButton && isDrawing)
   {
       joueur_2 *nouvelleligne = new joueur_2;
@@ -830,6 +809,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 }
 
 
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
   qDebug() << event->key() ;
@@ -844,6 +824,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::on_Courir_clicked()
 {
+    ui->start->setEnabled(true);
+    ui->reset->setEnabled(true);
+
     ui->Courir->setEnabled(false);
     if (courir == false or marcher == true or trottiner == true){
         courir = true;
@@ -865,6 +848,9 @@ void MainWindow::on_Courir_clicked()
 
 void MainWindow::on_Marcher_clicked()
 {
+    ui->start->setEnabled(true);
+    ui->reset->setEnabled(true);
+
     ui->Marcher->setEnabled(false);
     if(marcher == false or courir == true or trottiner == true)
     {
@@ -882,6 +868,9 @@ void MainWindow::on_Marcher_clicked()
 
 void MainWindow::on_Trottiner_clicked()
 {
+    ui->start->setEnabled(true);
+    ui->reset->setEnabled(true);
+
     ui->Trottiner->setEnabled(false);
     if(trottiner == false or marcher == true or courir == true)
     {
@@ -907,21 +896,21 @@ void MainWindow::on_start_clicked()
          if (trottiner == true) {
              color = QColor(255,171,0);
              //trottiner = true;
-             timer->setInterval(20);
+             timer->setInterval(((tempLigne->ptint.length()/5.9)*2) / vitesse_trottiner);
             }
 
          else if (marcher == true)
          {
              color = Qt::green;
              //marcher = true;
-             timer->setInterval(50);
+             timer->setInterval(((tempLigne->ptint.length()/5.9)*2) / vitesse_marche);
          }
 
          else if (courir == true)
          {
              color = Qt::red;
              //courir = true;
-             timer->setInterval(10);
+             timer->setInterval(((tempLigne->ptint.length()/5.9)*2) / vitesse_course);
          }
 
 
@@ -978,3 +967,16 @@ void MainWindow::on_reset_joueur_clicked()
     ui->reset_joueur->setEnabled(false);
 
 }
+
+void MainWindow::on_bouton_tableur_clicked()
+{
+    tableau_retard = new SpreadSheet(10,10);
+    tableau_retard->show();
+}
+
+
+ligne MainWindow::getTempLigne(ligne *tempLigne)
+{
+    emit sendTempLigne(tempLigne);
+}
+
